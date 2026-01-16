@@ -1,0 +1,165 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Settings</title>
+    <style>
+      :root{
+        --ui-bg: rgba(10,12,15,0.56);
+        --panel-bg: rgba(20,22,26,0.6);
+        --muted: rgba(255,255,255,0.12);
+        --accent: rgba(255,255,255,0.06);
+        --glass-border: rgba(255,255,255,0.06);
+        --text: #ffffff; /* brighter main text */
+        --muted-text: rgba(255,255,255,0.65); /* stronger muted text for readability */
+        --muted-subtle: rgba(255,255,255,0.42);
+        --accent-color: #ff4d4f;
+      }
+
+      /* Prefer system-installed JetBrains Nerd Font if available */
+      @font-face {
+        font-family: 'JetBrainsNerd';
+        src: local('JetBrainsMono Nerd Font'),
+             local('JetBrains Mono Nerd Font'),
+             local('JetBrainsMono NF');
+        font-weight: 100 900;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      html,body{height:100%;}
+      body{
+        margin:0;
+        font-family: 'JetBrainsNerd', 'JetBrains Mono', ui-sans-serif, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background: linear-gradient(180deg, rgba(8,10,12,1) 0%, rgba(16,18,22,1) 100%);
+        color:var(--text);
+        -webkit-font-smoothing:antialiased;
+        -moz-osx-font-smoothing:grayscale;
+        height:100vh;
+        padding:0;
+      }
+
+      /* subtle blurred backdrop to emulate translucency */
+      .backdrop {
+        position:fixed;
+        inset:0;
+        background: radial-gradient(800px 400px at 20% 10%, rgba(255,80,80,0.06), transparent 5%), radial-gradient(600px 300px at 80% 80%, rgba(0,120,255,0.04), transparent 10%);
+        pointer-events:none;
+        backdrop-filter: blur(6px) saturate(120%);
+      }
+
+      .panel{
+        /* Fill most of the app window with a small inset so UI looks integrated */
+        width:calc(100% - 24px);
+        height:calc(100% - 24px);
+        margin:12px;
+        border-radius:10px;
+        background: linear-gradient(180deg, rgba(18,20,24,0.64), rgba(14,16,20,0.48));
+        box-shadow: 0 18px 40px rgba(2,6,12,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+        border:1px solid var(--glass-border);
+        overflow:hidden;
+        display:flex;
+      }
+
+      .titlebar{
+        position:relative;
+        padding:14px 18px;
+        width:100%;
+        box-sizing:border-box;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        border-bottom:1px solid rgba(255,255,255,0.03);
+      }
+
+      .titlebar .title{font-weight:700; font-size:15px; color:var(--text);}
+      .titlebar .subtitle{font-size:12px;color:var(--muted-text);}
+      .close{background:transparent;border:0;color:var(--muted-text);font-size:18px;cursor:pointer;padding:6px;border-radius:6px}
+      .close:hover{background:rgba(255,255,255,0.03)}
+
+      .content{display:flex; width:100%;}
+
+      .sidebar{
+        width:180px;
+        background: linear-gradient(180deg, rgba(0,0,0,0.05), rgba(255,255,255,0.01));
+        border-right:1px solid rgba(255,255,255,0.03);
+        padding:16px 12px;
+        box-sizing:border-box;
+      }
+
+      .menu{list-style:none;margin:0;padding:8px 6px;}
+      .menu li{padding:12px 14px;border-radius:8px;color:var(--muted-subtle);margin:8px 0;cursor:pointer;display:flex;align-items:center;font-weight:600;letter-spacing:0.6px}
+      .menu li:hover{background:rgba(255,255,255,0.03);color:var(--text)}
+      .menu li.active{background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));color:var(--text);position:relative}
+      .menu li.active::before{content:'';position:absolute;left:-6px;top:8px;bottom:8px;width:4px;border-radius:4px;background:var(--accent-color);box-shadow:0 0 10px rgba(255,77,79,0.25)}
+      .menu li.active{padding-left:20px}
+
+      .pane{
+        padding:18px 22px;
+        flex:1;
+      }
+
+      .card{background:linear-gradient(180deg, rgba(24,26,30,0.66), rgba(18,20,24,0.6)); border-radius:10px; padding:16px; box-shadow: 0 6px 24px rgba(2,6,12,0.45); border:1px solid rgba(255,255,255,0.03)}
+      .card h2{margin:0 0 12px 0;font-size:15px;color:var(--text);font-weight:700}
+
+      .option{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:10px;margin:10px 0;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0));border-top:1px solid rgba(255,255,255,0.015);border-bottom:1px solid rgba(0,0,0,0.16)}
+      .option .label{color:var(--text);font-size:13px;opacity:0.92}
+      .option:hover{background:rgba(255,255,255,0.02)}
+
+      .checkbox{width:18px;height:18px;border-radius:6px;border:1px solid rgba(255,255,255,0.12);display:inline-block;position:relative;background:rgba(0,0,0,0.3)}
+      .checkbox.checked{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.2));box-shadow:inset 0 -2px 0 rgba(0,0,0,0.35);border-color:var(--accent-color);outline:2px solid rgba(255,77,79,0.06)}
+
+      /* small info row */
+      .hint{font-size:12px;color:var(--muted-subtle);margin-top:8px}
+
+      /* responsive */
+      @media (max-width:760px){
+        .panel{flex-direction:column;width:calc(100% - 40px)}
+        .sidebar{width:100%;display:flex;overflow:auto}
+        .menu{display:flex;flex-direction:row}
+        .menu li{white-space:nowrap;margin-right:8px}
+      }
+    </style>
+  </head>
+  <body>
+    <div class="backdrop"></div>
+    <div class="panel" role="dialog" aria-label="Settings">
+      <div style="flex:1;display:flex;flex-direction:column;">
+        <div class="titlebar">
+          <div>
+            <div class="title">Settings</div>
+            <div class="subtitle">Configure options</div>
+          </div>
+          <button class="close" title="Close">×</button>
+        </div>
+
+        <div class="content">
+          <aside class="sidebar">
+            <ul class="menu">
+              <li class="active">Main</li>
+              <li>Movement</li>
+              <li>Visual</li>
+            </ul>
+          </aside>
+
+          <main class="pane">
+            <div class="card">
+              <h2>Gun</h2>
+              <div class="option"><div class="label">Gun mod</div><div class="checkbox" id="cb1"></div></div>
+              <div class="option"><div class="label">Ray bypass</div><div class="checkbox checked" id="cb2"></div></div>
+              <div class="option"><div class="label">Wallbang</div><div class="checkbox" id="cb3"></div></div>
+              <div class="hint">Tip: Hover items to preview active state</div>
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // simple toggle behavior for the styled checkboxes
+      document.querySelectorAll('.checkbox').forEach(cb => {
+        cb.addEventListener('click', () => cb.classList.toggle('checked'));
+      });
+    </script>
+  </body>
+</html>
