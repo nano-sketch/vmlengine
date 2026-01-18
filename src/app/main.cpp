@@ -7,9 +7,8 @@
 #include <stdexcept>
 
 int main() {
-  lve::FirstApp app{};
-
   try {
+    lve::FirstApp app{};
     app.run();
   } catch (const std::exception &e) {
     std::cerr << e.what() << '\n';

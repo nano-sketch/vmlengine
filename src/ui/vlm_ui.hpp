@@ -1,9 +1,9 @@
 #pragma once
 
-#include "lve_device.hpp"
-#include "lve_buffer.hpp"
-#include "lve_descriptors.hpp"
-#include "lve_pipeline.hpp"
+#include "core/lve_device.hpp"
+#include "renderer/lve_buffer.hpp"
+#include "renderer/lve_descriptors.hpp"
+#include "renderer/lve_pipeline.hpp"
 
 // libs
 #include <AppCore/CAPI.h>
@@ -41,12 +41,12 @@ class VlmUi {
   uint32_t height;
   VkRenderPass renderPass;
 
-  // Ultralight C API
+  // the ultralight c api
   ULRenderer renderer;
   ULView view;
   ULConfig config;
 
-  // Vulkan Texture
+  // texture from vulkan
   VkImage uiImage;
   VkDeviceMemory uiImageMemory;
   VkImageView uiImageView;
@@ -55,10 +55,10 @@ class VlmUi {
   std::unique_ptr<LveDescriptorSetLayout> descriptorSetLayout;
   std::unique_ptr<LveDescriptorPool> descriptorPool;
 
-  // Staging
+  // staging
   std::unique_ptr<LveBuffer> stagingBuffer;
 
-  // Pipeline
+  // pipeline
   VkPipelineLayout pipelineLayout;
   std::unique_ptr<LvePipeline> lvePipeline;
 };

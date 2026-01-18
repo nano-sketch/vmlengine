@@ -1,0 +1,153 @@
+[  0%] Building C object src/CMakeFiles/glfw.dir/context.c.obj
+[  1%] Building C object src/CMakeFiles/glfw.dir/init.c.obj
+[  2%] Building C object src/CMakeFiles/glfw.dir/input.c.obj
+[  3%] Building C object src/CMakeFiles/glfw.dir/monitor.c.obj
+[  4%] Building C object src/CMakeFiles/glfw.dir/vulkan.c.obj
+[  5%] Building C object src/CMakeFiles/glfw.dir/window.c.obj
+[  5%] Building C object src/CMakeFiles/glfw.dir/win32_init.c.obj
+[  6%] Building C object src/CMakeFiles/glfw.dir/win32_joystick.c.obj
+[  7%] Building C object src/CMakeFiles/glfw.dir/win32_monitor.c.obj
+[  8%] Building C object src/CMakeFiles/glfw.dir/win32_time.c.obj
+[  9%] Building C object src/CMakeFiles/glfw.dir/win32_thread.c.obj
+[  9%] Building C object src/CMakeFiles/glfw.dir/win32_window.c.obj
+[ 10%] Building C object src/CMakeFiles/glfw.dir/wgl_context.c.obj
+[ 11%] Building C object src/CMakeFiles/glfw.dir/egl_context.c.obj
+[ 12%] Building C object src/CMakeFiles/glfw.dir/osmesa_context.c.obj
+[ 13%] Linking C static library libglfw3.a
+[ 13%] Built target glfw
+[ 13%] Building C object examples/CMakeFiles/boing.dir/boing.c.obj
+[ 14%] Building RC object examples/CMakeFiles/boing.dir/glfw.rc.obj
+[ 15%] Building C object examples/CMakeFiles/boing.dir/__/deps/glad.c.obj
+[ 16%] Linking C executable boing.exe
+[ 16%] Built target boing
+[ 17%] Building C object examples/CMakeFiles/gears.dir/gears.c.obj
+[ 18%] Building RC object examples/CMakeFiles/gears.dir/glfw.rc.obj
+[ 19%] Building C object examples/CMakeFiles/gears.dir/__/deps/glad.c.obj
+[ 20%] Linking C executable gears.exe
+[ 20%] Built target gears
+[ 21%] Building C object examples/CMakeFiles/heightmap.dir/heightmap.c.obj
+[ 22%] Building RC object examples/CMakeFiles/heightmap.dir/glfw.rc.obj
+[ 22%] Building C object examples/CMakeFiles/heightmap.dir/__/deps/glad.c.obj
+[ 23%] Linking C executable heightmap.exe
+[ 23%] Built target heightmap
+[ 24%] Building C object examples/CMakeFiles/offscreen.dir/offscreen.c.obj
+[ 25%] Building RC object examples/CMakeFiles/offscreen.dir/glfw.rc.obj
+[ 25%] Building C object examples/CMakeFiles/offscreen.dir/__/deps/glad.c.obj
+[ 26%] Linking C executable offscreen.exe
+[ 26%] Built target offscreen
+[ 27%] Building C object examples/CMakeFiles/particles.dir/particles.c.obj
+[ 27%] Building RC object examples/CMakeFiles/particles.dir/glfw.rc.obj
+[ 28%] Building C object examples/CMakeFiles/particles.dir/__/deps/tinycthread.c.obj
+[ 29%] Building C object examples/CMakeFiles/particles.dir/__/deps/getopt.c.obj
+[ 30%] Building C object examples/CMakeFiles/particles.dir/__/deps/glad.c.obj
+[ 31%] Linking C executable particles.exe
+[ 31%] Built target particles
+[ 32%] Building C object examples/CMakeFiles/sharing.dir/sharing.c.obj
+[ 33%] Building RC object examples/CMakeFiles/sharing.dir/glfw.rc.obj
+[ 33%] Building C object examples/CMakeFiles/sharing.dir/__/deps/glad.c.obj
+[ 34%] Linking C executable sharing.exe
+[ 34%] Built target sharing
+[ 35%] Building C object examples/CMakeFiles/simple.dir/simple.c.obj
+[ 36%] Building RC object examples/CMakeFiles/simple.dir/glfw.rc.obj
+[ 37%] Building C object examples/CMakeFiles/simple.dir/__/deps/glad.c.obj
+[ 38%] Linking C executable simple.exe
+[ 38%] Built target simple
+[ 38%] Building C object examples/CMakeFiles/splitview.dir/splitview.c.obj
+[ 39%] Building RC object examples/CMakeFiles/splitview.dir/glfw.rc.obj
+[ 40%] Building C object examples/CMakeFiles/splitview.dir/__/deps/glad.c.obj
+[ 41%] Linking C executable splitview.exe
+[ 41%] Built target splitview
+[ 42%] Building C object examples/CMakeFiles/wave.dir/wave.c.obj
+[ 43%] Building RC object examples/CMakeFiles/wave.dir/glfw.rc.obj
+[ 43%] Building C object examples/CMakeFiles/wave.dir/__/deps/glad.c.obj
+[ 44%] Linking C executable wave.exe
+[ 44%] Built target wave
+[ 45%] Building C object tests/CMakeFiles/clipboard.dir/clipboard.c.obj
+[ 45%] Building C object tests/CMakeFiles/clipboard.dir/__/deps/getopt.c.obj
+[ 46%] Building C object tests/CMakeFiles/clipboard.dir/__/deps/glad.c.obj
+[ 47%] Linking C executable clipboard.exe
+[ 47%] Built target clipboard
+[ 48%] Building C object tests/CMakeFiles/events.dir/events.c.obj
+[ 48%] Building C object tests/CMakeFiles/events.dir/__/deps/getopt.c.obj
+[ 49%] Building C object tests/CMakeFiles/events.dir/__/deps/glad.c.obj
+[ 50%] Linking C executable events.exe
+[ 50%] Built target events
+[ 51%] Building C object tests/CMakeFiles/msaa.dir/msaa.c.obj
+[ 51%] Building C object tests/CMakeFiles/msaa.dir/__/deps/getopt.c.obj
+[ 52%] Building C object tests/CMakeFiles/msaa.dir/__/deps/glad.c.obj
+[ 53%] Linking C executable msaa.exe
+[ 53%] Built target msaa
+[ 53%] Building C object tests/CMakeFiles/glfwinfo.dir/glfwinfo.c.obj
+[ 54%] Building C object tests/CMakeFiles/glfwinfo.dir/__/deps/getopt.c.obj
+[ 55%] Building C object tests/CMakeFiles/glfwinfo.dir/__/deps/glad.c.obj
+[ 56%] Linking C executable glfwinfo.exe
+[ 56%] Built target glfwinfo
+[ 56%] Building C object tests/CMakeFiles/iconify.dir/iconify.c.obj
+[ 57%] Building C object tests/CMakeFiles/iconify.dir/__/deps/getopt.c.obj
+[ 58%] Building C object tests/CMakeFiles/iconify.dir/__/deps/glad.c.obj
+[ 59%] Linking C executable iconify.exe
+[ 59%] Built target iconify
+[ 59%] Building C object tests/CMakeFiles/monitors.dir/monitors.c.obj
+[ 60%] Building C object tests/CMakeFiles/monitors.dir/__/deps/getopt.c.obj
+[ 61%] Building C object tests/CMakeFiles/monitors.dir/__/deps/glad.c.obj
+[ 62%] Linking C executable monitors.exe
+[ 62%] Built target monitors
+[ 62%] Building C object tests/CMakeFiles/reopen.dir/reopen.c.obj
+[ 63%] Building C object tests/CMakeFiles/reopen.dir/__/deps/glad.c.obj
+[ 64%] Linking C executable reopen.exe
+[ 64%] Built target reopen
+[ 65%] Building C object tests/CMakeFiles/cursor.dir/cursor.c.obj
+[ 66%] Building C object tests/CMakeFiles/cursor.dir/__/deps/glad.c.obj
+[ 66%] Linking C executable cursor.exe
+[ 66%] Built target cursor
+[ 67%] Building C object tests/CMakeFiles/empty.dir/empty.c.obj
+[ 68%] Building C object tests/CMakeFiles/empty.dir/__/deps/tinycthread.c.obj
+[ 69%] Building C object tests/CMakeFiles/empty.dir/__/deps/glad.c.obj
+[ 70%] Linking C executable empty.exe
+[ 70%] Built target empty
+[ 71%] Building C object tests/CMakeFiles/gamma.dir/gamma.c.obj
+[ 72%] Building C object tests/CMakeFiles/gamma.dir/__/deps/glad.c.obj
+[ 72%] Linking C executable gamma.exe
+[ 72%] Built target gamma
+[ 73%] Building C object tests/CMakeFiles/icon.dir/icon.c.obj
+[ 74%] Building C object tests/CMakeFiles/icon.dir/__/deps/glad.c.obj
+[ 75%] Linking C executable icon.exe
+[ 75%] Built target icon
+[ 76%] Building C object tests/CMakeFiles/inputlag.dir/inputlag.c.obj
+[ 76%] Building C object tests/CMakeFiles/inputlag.dir/__/deps/getopt.c.obj
+[ 77%] Building C object tests/CMakeFiles/inputlag.dir/__/deps/glad.c.obj
+[ 78%] Linking C executable inputlag.exe
+[ 78%] Built target inputlag
+[ 79%] Building C object tests/CMakeFiles/joysticks.dir/joysticks.c.obj
+[ 80%] Building C object tests/CMakeFiles/joysticks.dir/__/deps/glad.c.obj
+[ 81%] Linking C executable joysticks.exe
+[ 81%] Built target joysticks
+[ 82%] Building C object tests/CMakeFiles/opacity.dir/opacity.c.obj
+[ 83%] Building C object tests/CMakeFiles/opacity.dir/__/deps/glad.c.obj
+[ 84%] Linking C executable opacity.exe
+[ 84%] Built target opacity
+[ 85%] Building C object tests/CMakeFiles/tearing.dir/tearing.c.obj
+[ 85%] Building C object tests/CMakeFiles/tearing.dir/__/deps/glad.c.obj
+[ 86%] Linking C executable tearing.exe
+[ 86%] Built target tearing
+[ 87%] Building C object tests/CMakeFiles/threads.dir/threads.c.obj
+[ 88%] Building C object tests/CMakeFiles/threads.dir/__/deps/tinycthread.c.obj
+[ 89%] Building C object tests/CMakeFiles/threads.dir/__/deps/glad.c.obj
+[ 89%] Linking C executable threads.exe
+[ 89%] Built target threads
+[ 90%] Building C object tests/CMakeFiles/timeout.dir/timeout.c.obj
+[ 91%] Building C object tests/CMakeFiles/timeout.dir/__/deps/glad.c.obj
+[ 92%] Linking C executable timeout.exe
+[ 92%] Built target timeout
+[ 93%] Building C object tests/CMakeFiles/title.dir/title.c.obj
+[ 94%] Building C object tests/CMakeFiles/title.dir/__/deps/glad.c.obj
+[ 94%] Linking C executable title.exe
+[ 94%] Built target title
+[ 95%] Building C object tests/CMakeFiles/windows.dir/windows.c.obj
+[ 96%] Building C object tests/CMakeFiles/windows.dir/__/deps/getopt.c.obj
+[ 97%] Building C object tests/CMakeFiles/windows.dir/__/deps/glad.c.obj
+[ 98%] Linking C executable windows.exe
+[ 98%] Built target windows
+[ 99%] Building C object tests/CMakeFiles/vulkan.dir/vulkan.c.obj
+[100%] Linking C executable vulkan.exe
+[100%] Built target vulkan

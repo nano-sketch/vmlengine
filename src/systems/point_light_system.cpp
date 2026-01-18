@@ -1,4 +1,4 @@
-#include "point_light_system.hpp"
+#include "systems/point_light_system.hpp"
 
 // libs
 #define GLM_FORCE_RADIANS
@@ -95,8 +95,6 @@ void PointLightSystem::render(FrameInfo& frameInfo) {
   for (auto& kv : frameInfo.gameObjects) {
     auto& obj = kv.second;
     if (obj.pointLight == nullptr) continue;
-
-    // calculate distance
     auto offset = frameInfo.camera.getPosition() - obj.transform.translation;
     float disSquared = glm::dot(offset, offset);
     sorted[disSquared] = obj.getId();
@@ -114,9 +112,7 @@ void PointLightSystem::render(FrameInfo& frameInfo) {
       0,
       nullptr);
 
-  // iterate through sorted lights in reverse order
   for (auto it = sorted.rbegin(); it != sorted.rend(); ++it) {
-    // use game obj id to find light object
     auto& obj = frameInfo.gameObjects.at(it->second);
 
     PointLightPushConstants push{};

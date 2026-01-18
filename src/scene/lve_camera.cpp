@@ -1,4 +1,4 @@
-#include "lve_camera.hpp"
+#include "scene/lve_camera.hpp"
 
 // std
 #include <cassert>

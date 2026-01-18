@@ -1,6 +1,6 @@
-#include "lve_model.hpp"
-
-#include "lve_utils.hpp"
+#include "scene/lve_model.hpp"
+#include "core/lve_utils.hpp"
+#include "renderer/lve_buffer.hpp"
 
 // libs
 #define TINYOBJLOADER_IMPLEMENTATION
@@ -12,6 +12,8 @@
 #include <cassert>
 #include <cstring>
 #include <unordered_map>
+#include <iostream>
+#include <filesystem>
 
 #ifndef ENGINE_DIR
 #define ENGINE_DIR "../"
@@ -145,6 +147,11 @@ void LveModel::Builder::loadModel(const std::string &filepath) {
   std::vector<tinyobj::shape_t> shapes;
   std::vector<tinyobj::material_t> materials;
   std::string warn, err;
+
+  std::cout << "Attempting to load model from: " << filepath << std::endl;
+  try {
+      std::cout << "Absolute path: " << std::filesystem::absolute(std::filesystem::path(filepath)) << std::endl;
+  } catch (...) {}
 
   if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filepath.c_str())) {
     throw std::runtime_error(warn + err);

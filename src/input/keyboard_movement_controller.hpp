@@ -1,7 +1,7 @@
 #pragma once
 
-#include "lve_game_object.hpp"
-#include "lve_window.hpp"
+#include "scene/lve_game_object.hpp"
+#include "core/lve_window.hpp"
 
 namespace lve {
 class KeyboardMovementController {
@@ -19,7 +19,8 @@ class KeyboardMovementController {
     int lookDown = GLFW_KEY_DOWN;
   };
 
-  void moveInPlaneXZ(GLFWwindow* window, float dt, LveGameObject& gameObject);
+  void moveFree(GLFWwindow* window, float dt, LveGameObject& gameObject);
+  void resetInput() { firstMouse = true; }
 
   KeyMappings keys{};
   float moveSpeed{3.f};

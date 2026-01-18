@@ -100,7 +100,7 @@ if (WIN32)
 
   target_link_libraries(${PROJECT_NAME} 
     glfw3 
-    vulkan-1 
+    "${Vulkan_LIBRARIES}/vulkan-1.lib" 
     "${PROJECT_SOURCE_DIR}/ul/sdk/bin/AppCore.dll"
     "${PROJECT_SOURCE_DIR}/ul/sdk/bin/Ultralight.dll"
     "${PROJECT_SOURCE_DIR}/ul/sdk/bin/UltralightCore.dll"
@@ -152,3 +152,5 @@ add_custom_target(
     Shaders
     DEPENDS ${SPIRV_BINARY_FILES}
 )
+
+add_dependencies(${PROJECT_NAME} Shaders)

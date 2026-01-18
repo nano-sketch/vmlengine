@@ -1,4 +1,4 @@
-#include "lve_window.hpp"
+#include "core/lve_window.hpp"
 
 // std
 #include <stdexcept>

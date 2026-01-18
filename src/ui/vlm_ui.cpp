@@ -1,28 +1,22 @@
-#include "vlm_ui.hpp"
-
-// libs
+#include "ui/vlm_ui.hpp"
 #include <AppCore/CAPI.h>
-
-// std
 #include <iostream>
 #include <stdexcept>
 #include <cstring>
 
 namespace lve {
 
-// JS Console Callback
 void onConsoleMessage(void* user_data, ULView caller, ULMessageSource source,
                       ULMessageLevel level, ULString message,
                       unsigned int line_number, unsigned int column_number,
                       ULString source_id) {
   const char* msg = ulStringGetData(message);
-  std::cout << "[UI Console] " << msg << " (line " << line_number << ")" << std::endl;
+  std::cout << "console" << msg << " (line " << line_number << ")" << std::endl;
 }
 
 VlmUi::VlmUi(LveDevice &device, VkRenderPass renderPass, uint32_t width, uint32_t height)
     : lveDevice{device}, renderPass{renderPass}, width{width}, height{height} {
-  
-  // 1. Ultralight Setup
+
   config = ulCreateConfig();
   ULString resPath = ulCreateString("resources/");
   ulConfigSetResourcePathPrefix(config, resPath);
@@ -38,8 +32,7 @@ VlmUi::VlmUi(LveDevice &device, VkRenderPass renderPass, uint32_t width, uint32_
   ULViewConfig viewConfig = ulCreateViewConfig();
   ulViewConfigSetIsTransparent(viewConfig, true);
   ulViewConfigSetInitialFocus(viewConfig, true);
-  
-  // High DPI Support
+
   int winW, winH, fbW, fbH;
   GLFWwindow* glfwWin = lveDevice.getWindow().getGLFWwindow();
   glfwGetWindowSize(glfwWin, &winW, &winH);
@@ -52,7 +45,6 @@ VlmUi::VlmUi(LveDevice &device, VkRenderPass renderPass, uint32_t width, uint32_
   ulViewFocus(view);
   ulViewSetAddConsoleMessageCallback(view, onConsoleMessage, nullptr);
 
-  // Load a simple HTML with an ImGui-style look and auto-docking
   ULString htmlStr = ulCreateString(R"html(
     <html>
       <head>
@@ -140,7 +132,6 @@ VlmUi::VlmUi(LveDevice &device, VkRenderPass renderPass, uint32_t width, uint32_
             box.style.transition = 'left 0.15s ease-out, top 0.15s ease-out';
           };
 
-          // Bridge for C++
           window.updateTelemetry = function(fps, x, y, z) {
             document.getElementById('fps_val').innerText = fps.toFixed(1);
             document.getElementById('pos_val').innerText = x.toFixed(1) + ', ' + y.toFixed(1) + ', ' + z.toFixed(1);
@@ -157,7 +148,6 @@ VlmUi::VlmUi(LveDevice &device, VkRenderPass renderPass, uint32_t width, uint32_
   ulViewLoadHTML(view, htmlStr);
   ulDestroyString(htmlStr);
 
-  // 2. Vulkan Setup
   createUiTexture();
   createPipeline(renderPass);
 }
@@ -180,8 +170,7 @@ void VlmUi::resize(uint32_t newWidth, uint32_t newHeight) {
   height = newHeight;
 
   ulViewResize(view, width, height);
-  
-  // Update Scale for High DPI
+
   int winW, winH, fbW, fbH;
   GLFWwindow* glfwWin = lveDevice.getWindow().getGLFWwindow();
   glfwGetWindowSize(glfwWin, &winW, &winH);
@@ -189,15 +178,12 @@ void VlmUi::resize(uint32_t newWidth, uint32_t newHeight) {
   double scale = (double)fbW / (double)winW;
   ulViewSetDeviceScale(view, scale);
 
-  // Clean old Vulkan resources
   vkDestroySampler(lveDevice.device(), uiSampler, nullptr);
   vkDestroyImageView(lveDevice.device(), uiImageView, nullptr);
   vkDestroyImage(lveDevice.device(), uiImage, nullptr);
   vkFreeMemory(lveDevice.device(), uiImageMemory, nullptr);
   
-  // Recreate with new size
   createUiTexture();
-  // We don't need to recreate the pipeline, just update the texture
 }
 
 void VlmUi::update() {
@@ -259,7 +245,6 @@ void VlmUi::createUiTexture() {
       uiImage,
       uiImageMemory);
 
-  // Transition to shader read
   VkCommandBuffer commandBuffer = lveDevice.beginSingleTimeCommands();
   VkImageMemoryBarrier barrier{};
   barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;

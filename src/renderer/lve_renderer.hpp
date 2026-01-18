@@ -1,8 +1,8 @@
 #pragma once
 
-#include "lve_device.hpp"
-#include "lve_swap_chain.hpp"
-#include "lve_window.hpp"
+#include "core/lve_device.hpp"
+#include "renderer/lve_swap_chain.hpp"
+#include "core/lve_window.hpp"
 
 // std
 #include <cassert>
