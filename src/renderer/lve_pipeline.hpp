@@ -2,9 +2,13 @@
 
 #include "core/lve_device.hpp"
 
-// std
 #include <string>
 #include <vector>
+
+/**
+ * vulkan pipeline abstraction.
+ * manages shader loading, pipeline state, and creation.
+ */
 
 namespace lve {
 

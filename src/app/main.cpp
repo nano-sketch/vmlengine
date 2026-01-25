@@ -8,10 +8,12 @@
 
 int main() {
   try {
+    std::cout << "Starting app..." << std::endl;
     lve::FirstApp app{};
+    std::cout << "App created, running..." << std::endl;
     app.run();
   } catch (const std::exception &e) {
-    std::cerr << e.what() << '\n';
+    std::cerr << "Exception: " << e.what() << std::endl;
     return EXIT_FAILURE;
   }
 

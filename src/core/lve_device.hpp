@@ -2,9 +2,13 @@
 
 #include "core/lve_window.hpp"
 
-// std lib headers
 #include <string>
 #include <vector>
+
+/**
+ * vulkan device abstraction.
+ * manages instance, physical and logical device, queues, and command pools.
+ */
 
 namespace lve {
 
@@ -19,7 +23,7 @@ struct QueueFamilyIndices {
   uint32_t presentFamily;
   bool graphicsFamilyHasValue = false;
   bool presentFamilyHasValue = false;
-  bool isComplete() { return graphicsFamilyHasValue && presentFamilyHasValue; }
+  bool isComplete() const noexcept { return graphicsFamilyHasValue && presentFamilyHasValue; }
 };
 
 class LveDevice {
@@ -33,18 +37,17 @@ class LveDevice {
   LveDevice(LveWindow &window);
   ~LveDevice();
 
-  // Not copyable or movable
   LveDevice(const LveDevice &) = delete;
   LveDevice &operator=(const LveDevice &) = delete;
   LveDevice(LveDevice &&) = delete;
   LveDevice &operator=(LveDevice &&) = delete;
 
-  VkCommandPool getCommandPool() { return commandPool; }
-  VkDevice device() { return device_; }
-  VkSurfaceKHR surface() { return surface_; }
-  VkQueue graphicsQueue() { return graphicsQueue_; }
-  VkQueue presentQueue() { return presentQueue_; }
-  LveWindow &getWindow() { return window; }
+  VkCommandPool getCommandPool() const noexcept { return commandPool; }
+  VkDevice device() const noexcept { return device_; }
+  VkSurfaceKHR surface() const noexcept { return surface_; }
+  VkQueue graphicsQueue() const noexcept { return graphicsQueue_; }
+  VkQueue presentQueue() const noexcept { return presentQueue_; }
+  LveWindow &getWindow() const noexcept { return window; }
 
   SwapChainSupportDetails getSwapChainSupport() { return querySwapChainSupport(physicalDevice); }
   uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
@@ -52,7 +55,7 @@ class LveDevice {
   VkFormat findSupportedFormat(
       const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 
-  // Buffer Helper Functions
+  // buffer and image helpers
   void createBuffer(
       VkDeviceSize size,
       VkBufferUsageFlags usage,
@@ -81,7 +84,6 @@ class LveDevice {
   void createLogicalDevice();
   void createCommandPool();
 
-  // helper functions
   bool isDeviceSuitable(VkPhysicalDevice device);
   std::vector<const char *> getRequiredExtensions();
   bool checkValidationLayerSupport();

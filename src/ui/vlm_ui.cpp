@@ -3,21 +3,25 @@
 #include <iostream>
 #include <stdexcept>
 #include <cstring>
+#include <cstdio>
+
+/**
+ * ui implementation.
+ * manages the lifecycle of the ultralight renderer and synchronizes browser frames to vulkan textures.
+ */
 
 namespace lve {
 
-void onConsoleMessage(void* user_data, ULView caller, ULMessageSource source,
-                      ULMessageLevel level, ULString message,
-                      unsigned int line_number, unsigned int column_number,
-                      ULString source_id) {
-  const char* msg = ulStringGetData(message);
-  std::cout << "console" << msg << " (line " << line_number << ")" << std::endl;
+static void onConsoleMessage(void* data, ULView caller, ULMessageSource src, ULMessageLevel lvl, ULString msg, unsigned int line, unsigned int col, ULString src_id) {
+  std::cout << "ui console: " << ulStringGetData(msg) << " (line " << line << ")" << std::endl;
 }
 
-VlmUi::VlmUi(LveDevice &device, VkRenderPass renderPass, uint32_t width, uint32_t height)
-    : lveDevice{device}, renderPass{renderPass}, width{width}, height{height} {
+VlmUi::VlmUi(LveDevice &device, VkRenderPass rp, uint32_t w, uint32_t h)
+    : lveDevice{device}, currentRenderPass{rp}, width{w}, height{h} {
 
+  std::cout << "VlmUi constructor started" << std::endl;
   config = ulCreateConfig();
+  std::cout << "ulCreateConfig done" << std::endl;
   ULString resPath = ulCreateString("resources/");
   ulConfigSetResourcePathPrefix(config, resPath);
   ulDestroyString(resPath);
@@ -26,8 +30,10 @@ VlmUi::VlmUi(LveDevice &device, VkRenderPass renderPass, uint32_t width, uint32_
   ulEnablePlatformFontLoader();
   ulEnablePlatformFileSystem(baseDir);
   ulDestroyString(baseDir);
+  std::cout << "ulEnablePlatformFileSystem done" << std::endl;
 
   renderer = ulCreateRenderer(config);
+  std::cout << "ulCreateRenderer done" << std::endl;
 
   ULViewConfig viewConfig = ulCreateViewConfig();
   ulViewConfigSetIsTransparent(viewConfig, true);
@@ -37,10 +43,11 @@ VlmUi::VlmUi(LveDevice &device, VkRenderPass renderPass, uint32_t width, uint32_
   GLFWwindow* glfwWin = lveDevice.getWindow().getGLFWwindow();
   glfwGetWindowSize(glfwWin, &winW, &winH);
   glfwGetFramebufferSize(glfwWin, &fbW, &fbH);
-  double scale = (double)fbW / (double)winW;
-  ulViewConfigSetInitialDeviceScale(viewConfig, scale);
+  ulViewConfigSetInitialDeviceScale(viewConfig, (double)fbW / (double)winW);
+  std::cout << "View config created" << std::endl;
 
   view = ulCreateView(renderer, width, height, viewConfig, nullptr);
+  std::cout << "ulCreateView done" << std::endl;
   ulDestroyViewConfig(viewConfig);
   ulViewFocus(view);
   ulViewSetAddConsoleMessageCallback(view, onConsoleMessage, nullptr);
@@ -49,107 +56,86 @@ VlmUi::VlmUi(LveDevice &device, VkRenderPass renderPass, uint32_t width, uint32_
     <html>
       <head>
         <style>
+          :root {
+            --bg: rgba(10, 10, 15, 0.85);
+            --accent: #00f2ff;
+            --border: rgba(255, 255, 255, 0.12);
+            --text-main: #ffffff;
+            --text-dim: rgba(255, 255, 255, 0.5);
+          }
           body { 
-            margin: 0; padding: 0; 
-            background: transparent; 
-            overflow: hidden; 
-            font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
-            font-size: 13px;
+            margin: 0; padding: 0; background: transparent; overflow: hidden; 
+            font-family: -apple-system, "Segoe UI", Roboto, sans-serif; 
           }
-          .window {
-            position: absolute;
-            top: 50px; left: 50px;
-            width: 300px;
-            background: #0f0f0f;
-            border: 1px solid #333333;
-            color: #eeeeee;
-            display: flex; flex-direction: column;
-            box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
-            user-select: none;
-            transition: left 0.15s ease-out, top 0.15s ease-out;
+          .hud {
+            position: absolute; top: 30px; left: 30px;
+            width: 240px; background: var(--bg);
+            border: 1px solid var(--border); border-radius: 14px;
+            color: var(--text-main); padding: 18px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
+            user-select: none; transition: opacity 0.3s, transform 0.3s;
           }
-          .titlebar {
-            padding: 4px;
-            background: #004488;
-            height: 12px;
-            cursor: move;
+          .header {
+            display: flex; align-items: center; margin-bottom: 20px; cursor: move;
+            border-bottom: 1px solid var(--border); padding-bottom: 10px;
           }
-          .content { padding: 12px; flex: 1; }
-          .item { display: flex; margin-bottom: 8px; align-items: baseline; }
-          .label { width: 80px; color: #888888; font-size: 10px; text-transform: uppercase; font-weight: bold; }
-          .value { color: #00ffca; font-family: monospace; font-weight: bold; font-size: 14px; }
+          .title { font-size: 10px; font-weight: 800; letter-spacing: 0.15em; color: var(--text-dim); text-transform: uppercase; }
+          .stat-item { margin-bottom: 14px; }
+          .stat-item:last-child { margin-bottom: 0; }
+          .label { font-size: 9px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+          .value { font-size: 15px; font-weight: 700; color: var(--accent); font-family: "JetBrains Mono", monospace; }
         </style>
       </head>
       <body>
-        <div class="window" id="dragBox">
-          <div class="titlebar" id="handle"></div>
-          <div class="content">
-            <div class="item"><span class="label">GPU:</span><span class="value">Vulkan v1.3</span></div>
-            <div class="item"><span class="label">FPS:</span><span id="fps_val" class="value">0.0</span></div>
-            <div class="item"><span class="label">POS:</span><span id="pos_val" class="value">0.0, 0.0, 0.0</span></div>
-            <div class="item"><span class="label">Cycle:</span><span id="cycle_val" class="value">0</span></div>
+        <div class="hud" id="dragBox">
+          <div class="header" id="handle">
+            <div class="title">VML Engine Runtime</div>
+          </div>
+          <div class="stat-item">
+            <div class="label">Renderer</div>
+            <div class="value" style="color: #fff">Vulkan 1.3 / HLSL</div>
+          </div>
+          <div class="stat-item">
+            <div class="label">Framerate</div>
+            <div class="value" id="fps_val">0.0 FPS</div>
+          </div>
+          <div class="stat-item">
+            <div class="label">Coordinates (XYZ)</div>
+            <div class="value" id="pos_val">0.0, 0.0, 0.0</div>
+          </div>
+          <div class="stat-item">
+            <div class="label">Tick Count</div>
+            <div class="value" id="cycle_val">0</div>
           </div>
         </div>
         <script>
-          const box = document.getElementById('dragBox');
-          const handle = document.getElementById('handle');
-          let isDragging = false;
-          let offX, offY;
-          const SNAP_THRESHOLD = 50; 
-          const PADDING = 15;
-
-          handle.onmousedown = function(e) {
-            isDragging = true;
-            offX = e.clientX - box.offsetLeft;
-            offY = e.clientY - box.offsetTop;
-            box.style.transition = 'none';
+          const box = document.getElementById('dragBox'), handle = document.getElementById('handle');
+          let isDragging = false, ox, oy;
+          handle.onmousedown = (e) => { isDragging = true; ox = e.clientX - box.offsetLeft; oy = e.clientY - box.offsetTop; box.style.borderColor = 'rgba(0, 242, 255, 0.4)'; };
+          window.onmousemove = (e) => {
+            if (!isDragging) return;
+            let x = e.clientX - ox, y = e.clientY - oy;
+            box.style.left = x + 'px'; box.style.top = y + 'px';
           };
-
-          window.onmousemove = function(e) {
-            if (isDragging) {
-              let newX = e.clientX - offX;
-              let newY = e.clientY - offY;
-              
-              const screenW = window.innerWidth;
-              const screenH = window.innerHeight;
-              const boxW = box.offsetWidth;
-              const boxH = box.offsetHeight;
-
-              // Snap logic
-              if (newX < SNAP_THRESHOLD) newX = PADDING;
-              else if (newX + boxW > screenW - SNAP_THRESHOLD) newX = screenW - boxW - PADDING;
-
-              if (newY < SNAP_THRESHOLD) newY = PADDING;
-              else if (newY + boxH > screenH - SNAP_THRESHOLD) newY = screenH - boxH - PADDING;
-
-              box.style.left = newX + 'px';
-              box.style.top = newY + 'px';
-            }
+          window.onmouseup = () => { isDragging = false; box.style.borderColor = 'rgba(255, 255, 255, 0.12)'; };
+          window.updateTelemetry = (fps, x, y, z) => {
+            document.getElementById('fps_val').innerText = `${fps.toFixed(1)} FPS`;
+            document.getElementById('pos_val').innerText = `${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)}`;
           };
-
-          window.onmouseup = function() { 
-            isDragging = false; 
-            box.style.transition = 'left 0.15s ease-out, top 0.15s ease-out';
-          };
-
-          window.updateTelemetry = function(fps, x, y, z) {
-            document.getElementById('fps_val').innerText = fps.toFixed(1);
-            document.getElementById('pos_val').innerText = x.toFixed(1) + ', ' + y.toFixed(1) + ', ' + z.toFixed(1);
-          };
-
-          let count = 0;
-          setInterval(() => {
-            document.getElementById('cycle_val').innerText = count++;
-          }, 100);
+          let c = 0; setInterval(() => { document.getElementById('cycle_val').innerText = c++; }, 100);
         </script>
       </body>
     </html>
   )html");
   ulViewLoadHTML(view, htmlStr);
   ulDestroyString(htmlStr);
+  std::cout << "HTML loaded" << std::endl;
 
   createUiTexture();
-  createPipeline(renderPass);
+  std::cout << "createUiTexture done" << std::endl;
+  createPipeline(currentRenderPass);
+  std::cout << "createPipeline done" << std::endl;
 }
 
 VlmUi::~VlmUi() {
@@ -164,25 +150,21 @@ VlmUi::~VlmUi() {
   ulDestroyConfig(config);
 }
 
-void VlmUi::resize(uint32_t newWidth, uint32_t newHeight) {
-  if (newWidth == width && newHeight == height) return;
-  width = newWidth;
-  height = newHeight;
-
+void VlmUi::resize(uint32_t nw, uint32_t nh) {
+  if (nw == width && nh == height) return;
+  width = nw; height = nh;
   ulViewResize(view, width, height);
 
   int winW, winH, fbW, fbH;
   GLFWwindow* glfwWin = lveDevice.getWindow().getGLFWwindow();
   glfwGetWindowSize(glfwWin, &winW, &winH);
   glfwGetFramebufferSize(glfwWin, &fbW, &fbH);
-  double scale = (double)fbW / (double)winW;
-  ulViewSetDeviceScale(view, scale);
+  ulViewSetDeviceScale(view, (double)fbW / (double)winW);
 
   vkDestroySampler(lveDevice.device(), uiSampler, nullptr);
   vkDestroyImageView(lveDevice.device(), uiImageView, nullptr);
   vkDestroyImage(lveDevice.device(), uiImage, nullptr);
   vkFreeMemory(lveDevice.device(), uiImageMemory, nullptr);
-  
   createUiTexture();
 }
 
@@ -207,45 +189,29 @@ void VlmUi::updateTelemetry(float fps, float x, float y, float z) {
   ulDestroyString(script);
 }
 
-void VlmUi::render(VkCommandBuffer commandBuffer) {
-  lvePipeline->bind(commandBuffer);
-
-  vkCmdBindDescriptorSets(
-      commandBuffer,
-      VK_PIPELINE_BIND_POINT_GRAPHICS,
-      pipelineLayout,
-      0,
-      1,
-      &descriptorSet,
-      0,
-      nullptr);
-
-  vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+void VlmUi::render(VkCommandBuffer cmd) {
+  lvePipeline->bind(cmd);
+  vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
+  vkCmdDraw(cmd, 3, 1, 0, 0);
 }
 
 void VlmUi::createUiTexture() {
-  VkImageCreateInfo imageInfo{};
-  imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-  imageInfo.imageType = VK_IMAGE_TYPE_2D;
-  imageInfo.extent.width = width;
-  imageInfo.extent.height = height;
-  imageInfo.extent.depth = 1;
-  imageInfo.mipLevels = 1;
-  imageInfo.arrayLayers = 1;
-  imageInfo.format = VK_FORMAT_B8G8R8A8_UNORM;
-  imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-  imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-  imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-  imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-  imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+  VkImageCreateInfo info{};
+  info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+  info.imageType = VK_IMAGE_TYPE_2D;
+  info.format = VK_FORMAT_B8G8R8A8_UNORM;
+  info.extent = {width, height, 1};
+  info.mipLevels = 1;
+  info.arrayLayers = 1;
+  info.samples = VK_SAMPLE_COUNT_1_BIT;
+  info.tiling = VK_IMAGE_TILING_OPTIMAL;
+  info.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+  info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+  info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+  
+  lveDevice.createImageWithInfo(info, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, uiImage, uiImageMemory);
 
-  lveDevice.createImageWithInfo(
-      imageInfo,
-      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-      uiImage,
-      uiImageMemory);
-
-  VkCommandBuffer commandBuffer = lveDevice.beginSingleTimeCommands();
+  auto cmd = lveDevice.beginSingleTimeCommands();
   VkImageMemoryBarrier barrier{};
   barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
   barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -260,9 +226,9 @@ void VlmUi::createUiTexture() {
   barrier.subresourceRange.layerCount = 1;
   barrier.srcAccessMask = 0;
   barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-
-  vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
-  lveDevice.endSingleTimeCommands(commandBuffer);
+  
+  vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+  lveDevice.endSingleTimeCommands(cmd);
 
   VkImageViewCreateInfo viewInfo{};
   viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -274,59 +240,43 @@ void VlmUi::createUiTexture() {
   viewInfo.subresourceRange.levelCount = 1;
   viewInfo.subresourceRange.baseArrayLayer = 0;
   viewInfo.subresourceRange.layerCount = 1;
+  
+  if (vkCreateImageView(lveDevice.device(), &viewInfo, nullptr, &uiImageView) != VK_SUCCESS) throw std::runtime_error("failed to create ui image view");
 
-  if (vkCreateImageView(lveDevice.device(), &viewInfo, nullptr, &uiImageView) != VK_SUCCESS) {
-    throw std::runtime_error("failed to create ui image view!");
-  }
+  VkSamplerCreateInfo sampInfo{};
+  sampInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+  sampInfo.magFilter = VK_FILTER_LINEAR;
+  sampInfo.minFilter = VK_FILTER_LINEAR;
+  sampInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+  sampInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+  sampInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+  sampInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+  sampInfo.mipLodBias = 0.f;
+  sampInfo.anisotropyEnable = VK_FALSE;
+  sampInfo.compareEnable = VK_FALSE;
+  sampInfo.minLod = 0.f;
+  sampInfo.maxLod = 1.f;
+  sampInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+  
+  if (vkCreateSampler(lveDevice.device(), &sampInfo, nullptr, &uiSampler) != VK_SUCCESS) throw std::runtime_error("failed to create ui sampler");
 
-  VkSamplerCreateInfo samplerInfo{};
-  samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-  samplerInfo.magFilter = VK_FILTER_LINEAR;
-  samplerInfo.minFilter = VK_FILTER_LINEAR;
-  samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-  samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-  samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-  samplerInfo.anisotropyEnable = VK_FALSE;
-  samplerInfo.maxAnisotropy = 1.0f;
-  samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-  samplerInfo.unnormalizedCoordinates = VK_FALSE;
-  samplerInfo.compareEnable = VK_FALSE;
-  samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
-  samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+  descriptorPool = LveDescriptorPool::Builder(lveDevice).setMaxSets(1).addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1).build();
+  descriptorSetLayout = LveDescriptorSetLayout::Builder(lveDevice).addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT).build();
+  VkDescriptorImageInfo imageInfo{uiSampler, uiImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+  LveDescriptorWriter(*descriptorSetLayout, *descriptorPool).writeImage(0, &imageInfo).build(descriptorSet);
 
-  if (vkCreateSampler(lveDevice.device(), &samplerInfo, nullptr, &uiSampler) != VK_SUCCESS) {
-    throw std::runtime_error("failed to create ui sampler!");
-  }
-
-  descriptorPool = LveDescriptorPool::Builder(lveDevice)
-      .setMaxSets(1)
-      .addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1)
-      .build();
-
-  descriptorSetLayout = LveDescriptorSetLayout::Builder(lveDevice)
-      .addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-      .build();
-
-  auto imageInfoDescriptor = VkDescriptorImageInfo{uiSampler, uiImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
-  LveDescriptorWriter(*descriptorSetLayout, *descriptorPool)
-      .writeImage(0, &imageInfoDescriptor)
-      .build(descriptorSet);
-
-  stagingBuffer = std::make_unique<LveBuffer>(
-      lveDevice, 4, width * height,
-      VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+  stagingBuffer = std::make_unique<LveBuffer>(lveDevice, 4, width * height, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
   stagingBuffer->map();
 }
 
 void VlmUi::updateUiTexture() {
-  ULSurface surface = ulViewGetSurface(view);
-  ULBitmap bitmap = ulBitmapSurfaceGetBitmap(surface);
-  void* pixels = ulBitmapLockPixels(bitmap);
-  stagingBuffer->writeToBuffer(pixels);
-  ulBitmapUnlockPixels(bitmap);
+  ULSurface surf = ulViewGetSurface(view);
+  ULBitmap bmp = ulBitmapSurfaceGetBitmap(surf);
+  void* px = ulBitmapLockPixels(bmp);
+  stagingBuffer->writeToBuffer(px);
+  ulBitmapUnlockPixels(bmp);
 
-  VkCommandBuffer commandBuffer = lveDevice.beginSingleTimeCommands();
+  auto cmd = lveDevice.beginSingleTimeCommands();
   VkImageMemoryBarrier barrier{};
   barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
   barrier.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -341,74 +291,58 @@ void VlmUi::updateUiTexture() {
   barrier.subresourceRange.layerCount = 1;
   barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
   barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-
-  vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+  
+  vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
   lveDevice.copyBufferToImage(stagingBuffer->getBuffer(), uiImage, width, height, 1);
-
+  
   barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
   barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
   barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
   barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-  vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
-
-  lveDevice.endSingleTimeCommands(commandBuffer);
+  vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+  lveDevice.endSingleTimeCommands(cmd);
 }
 
-void VlmUi::createPipeline(VkRenderPass renderPass) {
-  VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-  pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-  pipelineLayoutInfo.setLayoutCount = 1;
+void VlmUi::createPipeline(VkRenderPass rp) {
+  VkPipelineLayoutCreateInfo info{};
+  info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+  info.setLayoutCount = 1;
   VkDescriptorSetLayout layouts[] = {descriptorSetLayout->getDescriptorSetLayout()};
-  pipelineLayoutInfo.pSetLayouts = layouts;
-  
-  if (vkCreatePipelineLayout(lveDevice.device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
-    throw std::runtime_error("failed to create ui pipeline layout!");
-  }
+  info.pSetLayouts = layouts;
+  if (vkCreatePipelineLayout(lveDevice.device(), &info, nullptr, &pipelineLayout) != VK_SUCCESS) throw std::runtime_error("failed to create ui pipeline layout");
 
-  PipelineConfigInfo pipelineConfig{};
-  LvePipeline::defaultPipelineConfigInfo(pipelineConfig);
-  pipelineConfig.renderPass = renderPass;
-  pipelineConfig.pipelineLayout = pipelineLayout;
-  pipelineConfig.colorBlendAttachment.blendEnable = VK_TRUE;
-  pipelineConfig.colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-  pipelineConfig.colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-  pipelineConfig.colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-  pipelineConfig.colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-  pipelineConfig.colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-  pipelineConfig.colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+  PipelineConfigInfo config{};
+  LvePipeline::defaultPipelineConfigInfo(config);
+  config.renderPass = rp;
+  config.pipelineLayout = pipelineLayout;
   
-  pipelineConfig.depthStencilInfo.depthTestEnable = VK_FALSE;
-  pipelineConfig.depthStencilInfo.depthWriteEnable = VK_FALSE;
-
-  lvePipeline = std::make_unique<LvePipeline>(lveDevice, "shaders/ui.vert.spv", "shaders/ui.frag.spv", pipelineConfig);
+  config.colorBlendAttachment.blendEnable = VK_TRUE;
+  config.colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+  config.colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+  config.colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+  config.colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+  config.colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+  config.colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+  config.colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+  
+  config.depthStencilInfo.depthTestEnable = VK_FALSE;
+  config.depthStencilInfo.depthWriteEnable = VK_FALSE;
+  lvePipeline = std::make_unique<LvePipeline>(lveDevice, "shaders/ui.vert.spv", "shaders/ui.frag.spv", config);
 }
 
 void VlmUi::handleMouseMove(double x, double y) {
-  GLFWwindow* window = lveDevice.getWindow().getGLFWwindow();
-
-  bool isLeftDown = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
-  ULMouseButton btn = isLeftDown ? kMouseButton_Left : kMouseButton_None;
-
-  ULMouseEvent evt = ulCreateMouseEvent(kMouseEventType_MouseMoved, (int)x, (int)y, btn);
+  bool isDown = glfwGetMouseButton(lveDevice.getWindow().getGLFWwindow(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
+  ULMouseEvent evt = ulCreateMouseEvent(kMouseEventType_MouseMoved, (int)x, (int)y, isDown ? kMouseButton_Left : kMouseButton_None);
   ulViewFireMouseEvent(view, evt);
   ulDestroyMouseEvent(evt);
 }
 
-void VlmUi::handleMouseButton(int button, int action, int mods) {
-  ULMouseButton btn = kMouseButton_None;
-  if (button == (0)) btn = kMouseButton_Left;
-  else if (button == (1)) btn = kMouseButton_Right;
-  else if (button == (2)) btn = kMouseButton_Middle;
-
-  ULMouseEventType type = (action == 1) ? kMouseEventType_MouseDown : kMouseEventType_MouseUp;
-  GLFWwindow* window = lveDevice.getWindow().getGLFWwindow();
-
-  double x, y;
-  glfwGetCursorPos(window, &x, &y);
-
-  ULMouseEvent evt = ulCreateMouseEvent(type, (int)x, (int)y, btn);
+void VlmUi::handleMouseButton(int btn, int act, int mods) {
+  ULMouseButton ubtn = (btn == 0) ? kMouseButton_Left : (btn == 1 ? kMouseButton_Right : (btn == 2 ? kMouseButton_Middle : kMouseButton_None));
+  double x, y; glfwGetCursorPos(lveDevice.getWindow().getGLFWwindow(), &x, &y);
+  ULMouseEvent evt = ulCreateMouseEvent((act == 1) ? kMouseEventType_MouseDown : kMouseEventType_MouseUp, (int)x, (int)y, ubtn);
   ulViewFireMouseEvent(view, evt);
   ulDestroyMouseEvent(evt);
 }
 
-} // namespace lve
+}  // namespace lve

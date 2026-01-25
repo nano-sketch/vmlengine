@@ -1,13 +1,17 @@
 #pragma once
 
 #include "scene/lve_model.hpp"
+#include "renderer/lve_texture.hpp"
 
-// libs
 #include <glm/gtc/matrix_transform.hpp>
 
-// std
 #include <memory>
 #include <unordered_map>
+
+/**
+ * game object system.
+ * uses a component-based model to represent entities in the 3d world.
+ */
 
 namespace lve {
 
@@ -16,11 +20,7 @@ struct TransformComponent {
   glm::vec3 scale{1.f, 1.f, 1.f};
   glm::vec3 rotation{};
 
-  // Matrix corrsponds to Translate * Ry * Rx * Rz * Scale
-  // Rotations correspond to Tait-bryan angles of Y(1), X(2), Z(3)
-  // https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix
   glm::mat4 mat4();
-
   glm::mat3 normalMatrix();
 };
 
@@ -46,13 +46,17 @@ class LveGameObject {
   LveGameObject(LveGameObject &&) = default;
   LveGameObject &operator=(LveGameObject &&) = default;
 
-  id_t getId() { return id; }
+  id_t getId() const noexcept { return id; }
 
+  std::string name{};
   glm::vec3 color{};
   TransformComponent transform{};
+  glm::vec2 uvScale{1.f, 1.f};
 
-  // Optional pointer components
   std::shared_ptr<LveModel> model{};
+  std::shared_ptr<LveTexture> diffuseMap = nullptr;
+  VkDescriptorSet textureDescriptorSet = VK_NULL_HANDLE;
+
   std::unique_ptr<PointLightComponent> pointLight = nullptr;
 
  private:
@@ -60,4 +64,5 @@ class LveGameObject {
 
   id_t id;
 };
+
 }  // namespace lve

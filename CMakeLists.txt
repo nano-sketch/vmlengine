@@ -13,6 +13,7 @@ if (CMAKE_GENERATOR STREQUAL "MinGW Makefiles")
     set(USE_MINGW "True")
     set(CMAKE_C_COMPILER ${MINGW_PATH}/bin/gcc.exe)
     set(CMAKE_CXX_COMPILER  ${MINGW_PATH}/bin/g++.exe)
+    set(CMAKE_MAKE_PROGRAM ${MINGW_PATH}/bin/mingw32-make.exe)
 endif()
 
 project(${NAME} VERSION 0.23.0)
@@ -62,11 +63,11 @@ if (NOT TINYOBJ_PATH)
   set(TINYOBJ_PATH external/tinyobjloader)
 endif()
 
-file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp ${PROJECT_SOURCE_DIR}/external/im3d/*.cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/build")
 
@@ -89,7 +90,9 @@ if (WIN32)
     ${TINYOBJ_PATH}
     ${GLFW_INCLUDE_DIRS}
     ${GLM_PATH}
+    ${PROJECT_SOURCE_DIR}/external/tinygltf
     ${PROJECT_SOURCE_DIR}/ul/sdk/include
+    ${PROJECT_SOURCE_DIR}/external/im3d
     )
 
   target_link_directories(${PROJECT_NAME} PUBLIC
@@ -101,10 +104,10 @@ if (WIN32)
   target_link_libraries(${PROJECT_NAME} 
     glfw3 
     "${Vulkan_LIBRARIES}/vulkan-1.lib" 
-    "${PROJECT_SOURCE_DIR}/ul/sdk/bin/AppCore.dll"
-    "${PROJECT_SOURCE_DIR}/ul/sdk/bin/Ultralight.dll"
-    "${PROJECT_SOURCE_DIR}/ul/sdk/bin/UltralightCore.dll"
-    "${PROJECT_SOURCE_DIR}/ul/sdk/bin/WebCore.dll"
+    "${PROJECT_SOURCE_DIR}/ul/sdk/lib/AppCore.lib"
+    "${PROJECT_SOURCE_DIR}/ul/sdk/lib/Ultralight.lib"
+    "${PROJECT_SOURCE_DIR}/ul/sdk/lib/UltralightCore.lib"
+    "${PROJECT_SOURCE_DIR}/ul/sdk/lib/WebCore.lib"
     shlwapi dwmapi winmm
   )
 elseif (UNIX)

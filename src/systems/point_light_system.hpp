@@ -1,20 +1,23 @@
 #pragma once
 
-#include "scene/lve_camera.hpp"
 #include "core/lve_device.hpp"
 #include "renderer/lve_frame_info.hpp"
-#include "scene/lve_game_object.hpp"
 #include "renderer/lve_pipeline.hpp"
+#include "scene/lve_game_object.hpp"
 
-// std
 #include <memory>
 #include <vector>
 
+/**
+ * point light rendering system.
+ * manages billboards for lights and updates light data in the global ubo.
+ */
+
 namespace lve {
+
 class PointLightSystem {
  public:
-  PointLightSystem(
-      LveDevice &device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
+  PointLightSystem(LveDevice &device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
   ~PointLightSystem();
 
   PointLightSystem(const PointLightSystem &) = delete;
@@ -28,8 +31,8 @@ class PointLightSystem {
   void createPipeline(VkRenderPass renderPass);
 
   LveDevice &lveDevice;
-
   std::unique_ptr<LvePipeline> lvePipeline;
   VkPipelineLayout pipelineLayout;
 };
+
 }  // namespace lve

@@ -5,12 +5,16 @@
 #include "renderer/lve_descriptors.hpp"
 #include "renderer/lve_pipeline.hpp"
 
-// libs
 #include <AppCore/CAPI.h>
 
-// std
 #include <memory>
 #include <vector>
+
+/**
+ * html-based ui system.
+ * integrates the ultralight library to provide a browser-based overlay.
+ * github: https://github.com/ultralight-ux/Ultralight
+ */
 
 namespace lve {
 
@@ -39,26 +43,22 @@ class VlmUi {
   LveDevice &lveDevice;
   uint32_t width;
   uint32_t height;
-  VkRenderPass renderPass;
+  VkRenderPass currentRenderPass;
 
-  // the ultralight c api
   ULRenderer renderer;
   ULView view;
   ULConfig config;
 
-  // texture from vulkan
-  VkImage uiImage;
-  VkDeviceMemory uiImageMemory;
-  VkImageView uiImageView;
-  VkSampler uiSampler;
-  VkDescriptorSet descriptorSet;
+  VkImage uiImage = VK_NULL_HANDLE;
+  VkDeviceMemory uiImageMemory = VK_NULL_HANDLE;
+  VkImageView uiImageView = VK_NULL_HANDLE;
+  VkSampler uiSampler = VK_NULL_HANDLE;
+  VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
+  
   std::unique_ptr<LveDescriptorSetLayout> descriptorSetLayout;
   std::unique_ptr<LveDescriptorPool> descriptorPool;
-
-  // staging
   std::unique_ptr<LveBuffer> stagingBuffer;
 
-  // pipeline
   VkPipelineLayout pipelineLayout;
   std::unique_ptr<LvePipeline> lvePipeline;
 };

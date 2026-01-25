@@ -2,10 +2,14 @@
 
 #include "core/lve_device.hpp"
 
-// std
 #include <memory>
 #include <unordered_map>
 #include <vector>
+
+/**
+ * vulkan descriptor management.
+ * provides builder patterns for layouts, pools, and writers.
+ */
 
 namespace lve {
 
@@ -27,13 +31,12 @@ class LveDescriptorSetLayout {
     std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings{};
   };
 
-  LveDescriptorSetLayout(
-      LveDevice &lveDevice, std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings);
+  LveDescriptorSetLayout(LveDevice &lveDevice, std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings);
   ~LveDescriptorSetLayout();
   LveDescriptorSetLayout(const LveDescriptorSetLayout &) = delete;
   LveDescriptorSetLayout &operator=(const LveDescriptorSetLayout &) = delete;
 
-  VkDescriptorSetLayout getDescriptorSetLayout() const { return descriptorSetLayout; }
+  VkDescriptorSetLayout getDescriptorSetLayout() const noexcept { return descriptorSetLayout; }
 
  private:
   LveDevice &lveDevice;
@@ -70,11 +73,8 @@ class LveDescriptorPool {
   LveDescriptorPool(const LveDescriptorPool &) = delete;
   LveDescriptorPool &operator=(const LveDescriptorPool &) = delete;
 
-  bool allocateDescriptor(
-      const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet &descriptor) const;
-
+  bool allocateDescriptor(const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet &descriptor) const;
   void freeDescriptors(std::vector<VkDescriptorSet> &descriptors) const;
-
   void resetPool();
 
  private:

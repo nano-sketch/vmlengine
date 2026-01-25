@@ -3,7 +3,13 @@
 #include "scene/lve_game_object.hpp"
 #include "core/lve_window.hpp"
 
+/**
+ * input controller for camera navigation.
+ * implements free fly movement with roblox-style mouse rotation.
+ */
+
 namespace lve {
+
 class KeyboardMovementController {
  public:
   struct KeyMappings {
@@ -20,15 +26,19 @@ class KeyboardMovementController {
   };
 
   void moveFree(GLFWwindow* window, float dt, LveGameObject& gameObject);
-  void resetInput() { firstMouse = true; }
+  void handleScroll(GLFWwindow* window, double yOffset, LveGameObject& gameObject);
+  void resetInput() noexcept { firstMouse = true; rightMousePressed = false; }
 
   KeyMappings keys{};
   float moveSpeed{3.f};
   float lookSpeed{1.5f};
   float mouseSensitivity{0.002f};
+  float scrollSpeed{0.5f};
 
  private:
   bool firstMouse = true;
-  double lastX, lastY;
+  bool rightMousePressed = false;
+  double lastX = 0, lastY = 0;
 };
+
 }  // namespace lve

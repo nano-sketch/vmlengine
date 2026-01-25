@@ -1,11 +1,11 @@
-# Build directories
+
 build/
 cmake-build-debug/
 cmake-build-release/
 bin/
 obj/
 
-# IDE specific files
+
 .idea/
 .vscode/
 .vs/
@@ -17,14 +17,12 @@ obj/
 *.vcxproj
 *.filters
 
-# Local environment / configuration
+
 .env.cmake
 .env
 
-# Compiled shaders
 shaders/*.spv
 
-# Executables and libraries (if produced in src or root)
 *.exe
 *.dll
 *.pdb
@@ -35,13 +33,8 @@ shaders/*.spv
 *.o
 *.obj
 
-# OS generated files
 Thumbs.db
 desktop.ini
 .DS_Store
 
-# Ultralight SDK (comment out if you want to track the SDK in git)
-# ul/
-
-# Other temporary files
 *.log

@@ -2,6 +2,13 @@
 
 #include "core/lve_device.hpp"
 
+#include <cstddef>
+
+/**
+ * vulkan buffer wrapper.
+ * manages memory allocation, mapping, and descriptor info for gpu buffers.
+ */
+
 namespace lve {
 
 class LveBuffer {
@@ -23,25 +30,25 @@ class LveBuffer {
 
   void writeToBuffer(void* data, VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
   VkResult flush(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
-  VkDescriptorBufferInfo descriptorInfo(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
+  VkDescriptorBufferInfo descriptorInfo(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0) const noexcept;
   VkResult invalidate(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
 
   void writeToIndex(void* data, int index);
   VkResult flushIndex(int index);
-  VkDescriptorBufferInfo descriptorInfoForIndex(int index);
+  VkDescriptorBufferInfo descriptorInfoForIndex(int index) const noexcept;
   VkResult invalidateIndex(int index);
 
-  VkBuffer getBuffer() const { return buffer; }
-  void* getMappedMemory() const { return mapped; }
-  uint32_t getInstanceCount() const { return instanceCount; }
-  VkDeviceSize getInstanceSize() const { return instanceSize; }
-  VkDeviceSize getAlignmentSize() const { return instanceSize; }
-  VkBufferUsageFlags getUsageFlags() const { return usageFlags; }
-  VkMemoryPropertyFlags getMemoryPropertyFlags() const { return memoryPropertyFlags; }
-  VkDeviceSize getBufferSize() const { return bufferSize; }
+  VkBuffer getBuffer() const noexcept { return buffer; }
+  void* getMappedMemory() const noexcept { return mapped; }
+  uint32_t getInstanceCount() const noexcept { return instanceCount; }
+  VkDeviceSize getInstanceSize() const noexcept { return instanceSize; }
+  VkDeviceSize getAlignmentSize() const noexcept { return alignmentSize; }
+  VkBufferUsageFlags getUsageFlags() const noexcept { return usageFlags; }
+  VkMemoryPropertyFlags getMemoryPropertyFlags() const noexcept { return memoryPropertyFlags; }
+  VkDeviceSize getBufferSize() const noexcept { return bufferSize; }
 
  private:
-  static VkDeviceSize getAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment);
+  static VkDeviceSize getAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment) noexcept;
 
   LveDevice& lveDevice;
   void* mapped = nullptr;
