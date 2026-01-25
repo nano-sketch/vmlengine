@@ -14,3 +14,8 @@ https://libnoise.sourceforge.net/glossary/index.html#coherentnoise
 https://github.com/john-chapman/im3d
 
 <img width="1162" height="767" alt="image" src="https://github.com/user-attachments/assets/8a4597f1-0ba9-4de0-8844-1ac458df9f2d" />
+
+
+## rework on the ui,(will fix soon)
+
+<img width="323" height="297" alt="image" src="https://github.com/user-attachments/assets/046b5be5-761c-49b6-81f7-772e2b55e974" />
