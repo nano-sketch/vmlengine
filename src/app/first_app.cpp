@@ -279,12 +279,12 @@ void FirstApp::run() {
       uboBuffers[frameIndex]->writeToBuffer(&ubo);
       uboBuffers[frameIndex]->flush();
 
-      // step 1: shadow map generation pass
+      //shadow map generation pass
       lveRenderer.beginShadowRenderPass(commandBuffer, shadowMap);
       shadowSystem->renderShadowMap(frameInfo, lightProjectionView);
       lveRenderer.endShadowRenderPass(commandBuffer);
 
-      // step 2: high quality forward pass with ui and debug overlays
+      // high quality forward pass with ui and debug overlays
       lveRenderer.beginSwapChainRenderPass(commandBuffer);
       simpleRenderSystem->renderGameObjects(frameInfo, shadowDescriptorSet);
       pointLightSystem->render(frameInfo);
