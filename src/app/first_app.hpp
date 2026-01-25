@@ -51,11 +51,39 @@ class FirstApp {
 
  private:
   /**
-   * factory method for populating the scene with default game objects and lights.
+  /**
+   * initializes the global descriptor pool used for uniform buffers and textures.
+   */
+  void initGlobalDescriptorPool();
+
+  /**
+   * populates the default game scene with objects, lights, and materials.
    */
   void loadGameObjects();
+
+  /**
+   * loads cached object transforms from disk persistence.
+   */
   void loadTransforms();
+
+  /**
+   * persists current object transforms to disk for next session.
+   */
   void saveTransforms();
+
+  /**
+   * handles per-frame input polling and camera controller logic.
+   * @param frameTime time delta since last frame.
+   * @param viewerObject camera proxy object.
+   * @param cameraController input controller instance.
+   */
+  void processInput(float frameTime, LveGameObject& viewerObject, class KeyboardMovementController& cameraController);
+
+  /**
+   * executes the primary rendering pipeline for a single frame.
+   * @param frameInfo context data for the current frame.
+   */
+  void renderFrame();
 
   // core windowing and device handles
   LveWindow lveWindow{WIDTH, HEIGHT, "vlm engine"};
@@ -64,12 +92,21 @@ class FirstApp {
 
   // global resource management
   std::unique_ptr<LveDescriptorPool> globalPool{};
+  std::unique_ptr<LveDescriptorSetLayout> globalSetLayout{};
+  std::vector<std::unique_ptr<LveBuffer>> uboBuffers;
+  std::vector<VkDescriptorSet> globalDescriptorSets;
+  
   LveGameObject::Map gameObjects;
   
   // high level subsystems
   std::unique_ptr<VlmUi> vlmUi;
   std::unique_ptr<LveShadowMap> shadowMap;
   std::unique_ptr<ShadowSystem> shadowSystem;
+  
+  // render systems
+  std::unique_ptr<class SimpleRenderSystem> simpleRenderSystem;
+  std::unique_ptr<class PointLightSystem> pointLightSystem;
+  std::unique_ptr<class Im3dSystem> im3dSystem;
   
   // descriptor sets
   VkDescriptorSet shadowDescriptorSet;
